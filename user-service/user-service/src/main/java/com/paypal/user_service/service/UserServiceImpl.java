@@ -2,6 +2,7 @@ package com.paypal.user_service.service;
 
 import com.paypal.user_service.exception.InvalidCredentialsException;
 import com.paypal.user_service.exception.UserAlreadyExistsException;
+import com.paypal.user_service.exception.UserNotFoundException;
 import com.paypal.user_service.model.dto.JwtResponse;
 import com.paypal.user_service.model.dto.LoginRequest;
 import com.paypal.user_service.model.dto.SignupRequest;
@@ -69,7 +70,7 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> {
-                    log.warn("User not found: {}", loginRequest.getEmail());
+                    log.warn("User not found with email: {}", loginRequest.getEmail());
                     return new InvalidCredentialsException("Invalid email or password");
                 });
 
@@ -84,6 +85,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String token = jwtUtils.generateToken(
+                user.getId(),
                 user.getEmail(),
                 user.getRole().name()
         );
@@ -97,5 +99,18 @@ public class UserServiceImpl implements UserService {
                 .role(user.getRole().name())
                 .expiresIn(jwtExpiration)
                 .build();
+    }
+
+    @Override
+    public UserResponse getUserById(Long id) {
+
+        log.info("Fetching user by id: {}", id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("User not found with id: {}", id);
+                    return new UserNotFoundException("User id not found");
+                });
+
+        return userMapper.toResponse(user);
     }
 }

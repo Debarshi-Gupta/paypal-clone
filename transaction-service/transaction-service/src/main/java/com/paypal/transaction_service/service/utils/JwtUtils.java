@@ -1,4 +1,4 @@
-package com.paypal.user_service.service.utils;
+package com.paypal.transaction_service.service.utils;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -27,24 +27,6 @@ public class JwtUtils {
     @PostConstruct
     public void init() {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
-    }
-
-    public String generateToken(Long userId, String username, String role) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role);
-        claims.put("userId", userId);
-
-        return createToken(claims, username);
-    }
-
-    private String createToken(Map<String, Object> claims, String subject) {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
     }
 
     public String extractUsername(String token) {

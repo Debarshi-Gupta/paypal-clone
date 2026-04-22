@@ -10,4 +10,6 @@ public interface UserService {
     UserResponse registerUser(SignupRequest signupRequest);
 
     JwtResponse loginUser(LoginRequest loginRequest);
+
+    UserResponse getUserById(Long id);
 }

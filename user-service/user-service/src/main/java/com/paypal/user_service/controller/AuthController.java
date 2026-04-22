@@ -30,4 +30,10 @@ public class AuthController {
         log.info("Login API called");
         return ResponseEntity.ok(userService.loginUser(loginRequest));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        log.info("Get user by id API called");
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
 }
