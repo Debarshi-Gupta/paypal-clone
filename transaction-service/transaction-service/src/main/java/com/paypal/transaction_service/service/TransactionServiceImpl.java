@@ -4,8 +4,10 @@ import com.paypal.transaction_service.exception.UnauthorizedTransactionException
 import com.paypal.transaction_service.model.dto.CreateTransactionRequest;
 import com.paypal.transaction_service.model.dto.TransactionResponse;
 import com.paypal.transaction_service.model.entity.Transaction;
+import com.paypal.transaction_service.model.entity.TransactionStatus;
 import com.paypal.transaction_service.repository.TransactionRepository;
 import com.paypal.transaction_service.service.feign.UserClient;
+import com.paypal.transaction_service.service.feign.WalletClient;
 import com.paypal.transaction_service.service.mapper.TransactionMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,30 +23,38 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository repository;
     private final TransactionMapper mapper;
     private final UserClient userClient;
+    private final WalletClient walletClient;
 
     @Override
     public TransactionResponse createTransaction(Long senderId, CreateTransactionRequest request) {
 
-        log.info("Creating transaction from sender: {} to receiver: {}", senderId, request.getReceiverId());
+        log.info("Creating transaction from {} to {}", senderId, request.getReceiverId());
 
         if (senderId.equals(request.getReceiverId())) {
             throw new UnauthorizedTransactionException("Sender and receiver cannot be same");
         }
 
         userClient.getUserById(senderId);
-
         userClient.getUserById(request.getReceiverId());
+
+        try {
+            walletClient.transfer(senderId, request.getReceiverId(), request.getAmount());
+        } catch (Exception ex) {
+            log.error("Wallet transfer failed", ex);
+            throw new RuntimeException(ex.getMessage());
+        }
 
         Transaction txn = Transaction.builder()
                 .senderId(senderId)
                 .receiverId(request.getReceiverId())
                 .amount(request.getAmount())
                 .description(request.getDescription())
+                .status(TransactionStatus.SUCCESS)
                 .build();
 
         Transaction saved = repository.save(txn);
 
-        log.info("Transaction created with id: {}", saved.getId());
+        log.info("Transaction successful: {}", saved.getId());
 
         return mapper.toResponse(saved);
     }

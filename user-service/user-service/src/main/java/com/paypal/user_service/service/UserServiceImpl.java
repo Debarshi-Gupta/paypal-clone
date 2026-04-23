@@ -10,6 +10,7 @@ import com.paypal.user_service.model.dto.UserResponse;
 import com.paypal.user_service.model.entity.Role;
 import com.paypal.user_service.model.entity.User;
 import com.paypal.user_service.repository.UserRepository;
+import com.paypal.user_service.service.feign.WalletClient;
 import com.paypal.user_service.service.mapper.UserMapper;
 import com.paypal.user_service.service.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final UserMapper userMapper;
+    private final WalletClient walletClient;
 
     @Value("${admin.secret.key}")
     private String adminSecretKey;
@@ -57,6 +59,14 @@ public class UserServiceImpl implements UserService {
         }
 
         User savedUser = userRepository.save(user);
+
+        try {
+            walletClient.createWallet(savedUser.getId());
+        } catch (Exception ex) {
+            log.error("Failed to create wallet for user {}", savedUser.getId(), ex);
+            userRepository.delete(savedUser);
+            throw new RuntimeException(ex.getMessage());
+        }
 
         log.info("User registered successfully with id: {}", savedUser.getId());
 
