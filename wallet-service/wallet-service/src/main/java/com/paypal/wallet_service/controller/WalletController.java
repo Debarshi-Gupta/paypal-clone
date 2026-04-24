@@ -1,6 +1,7 @@
 package com.paypal.wallet_service.controller;
 
 import com.paypal.wallet_service.model.dto.DepositRequest;
+import com.paypal.wallet_service.model.dto.DepositResponse;
 import com.paypal.wallet_service.service.WalletService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,37 +31,20 @@ public class WalletController {
     }
 
     @GetMapping("/balance")
-    public ResponseEntity<BigDecimal> getBalance(Authentication authentication) {
+    public ResponseEntity<BigDecimal> getBalance(@RequestParam Long userId) {
 
-        Long userId = (Long) authentication.getCredentials();
+        log.info("API call: get balance for user {}", userId);
 
         return ResponseEntity.ok(service.getBalance(userId));
     }
 
     @PostMapping("/deposit")
-    public ResponseEntity<String> deposit(
-            @Valid @RequestBody DepositRequest request,
-            Authentication authentication) {
-
-        Long userId = (Long) authentication.getCredentials();
+    public ResponseEntity<DepositResponse> deposit(
+            @RequestParam Long userId,
+            @Valid @RequestBody DepositRequest request) {
 
         log.info("API call: deposit for user {}", userId);
 
-        service.deposit(userId, request.getAmount());
-
-        return ResponseEntity.ok("Deposit successful");
-    }
-
-    @PostMapping("/transfer")
-    public ResponseEntity<Void> internalTransfer(
-            @RequestParam Long senderId,
-            @RequestParam Long receiverId,
-            @RequestParam BigDecimal amount) {
-
-        log.info("Internal API: transfer from {} to {}", senderId, receiverId);
-
-        service.transfer(senderId, receiverId, amount);
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(service.deposit(userId, request.getAmount()));
     }
 }

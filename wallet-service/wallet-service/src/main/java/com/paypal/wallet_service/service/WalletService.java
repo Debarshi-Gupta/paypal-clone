@@ -1,5 +1,6 @@
 package com.paypal.wallet_service.service;
 
+import com.paypal.wallet_service.model.dto.DepositResponse;
 import com.paypal.wallet_service.model.entity.Wallet;
 
 import java.math.BigDecimal;
@@ -10,7 +11,7 @@ public interface WalletService {
 
     BigDecimal getBalance(Long userId);
 
-    void deposit(Long userId, BigDecimal amount);
+    DepositResponse deposit(Long userId, BigDecimal amount);
 
     void transfer(Long senderId, Long receiverId, BigDecimal amount);
 }

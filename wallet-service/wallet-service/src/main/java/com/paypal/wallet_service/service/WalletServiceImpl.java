@@ -3,6 +3,7 @@ package com.paypal.wallet_service.service;
 import com.paypal.wallet_service.exception.InsufficientBalanceException;
 import com.paypal.wallet_service.exception.WalletAlreadyExistsException;
 import com.paypal.wallet_service.exception.WalletNotFoundException;
+import com.paypal.wallet_service.model.dto.DepositResponse;
 import com.paypal.wallet_service.model.entity.Wallet;
 import com.paypal.wallet_service.repository.WalletRepository;
 import jakarta.transaction.Transactional;
@@ -44,7 +45,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Transactional
-    public void deposit(Long userId, BigDecimal amount) {
+    public DepositResponse deposit(Long userId, BigDecimal amount) {
 
         log.info("Depositing {} to wallet of user {}", amount, userId);
 
@@ -58,6 +59,11 @@ public class WalletServiceImpl implements WalletService {
         wallet.setBalance(wallet.getBalance().add(amount));
 
         log.info("Deposit successful. New balance for user {} is {}", userId, wallet.getBalance());
+
+        return DepositResponse.builder()
+                .amount(amount)
+                .currentBalance(wallet.getBalance())
+                .build();
     }
 
     @Transactional

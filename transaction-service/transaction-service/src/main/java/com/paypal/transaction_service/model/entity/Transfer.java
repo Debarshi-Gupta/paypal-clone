@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transactions",
+@Table(name = "transfers",
         indexes = {
                 @Index(name = "idx_sender", columnList = "sender_id"),
                 @Index(name = "idx_receiver", columnList = "receiver_id")
@@ -17,10 +17,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Transaction {
+public class Transfer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "transfer_id")
     private Long id;
 
     @Column(name = "sender_id", nullable = false)
@@ -34,7 +35,7 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TransactionStatus status;
+    private TransferStatus status;
 
     @Column(length = 255)
     private String description;
@@ -49,7 +50,7 @@ public class Transaction {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        this.status = TransactionStatus.PENDING;
+        this.status = TransferStatus.PENDING;
     }
 
     @PreUpdate

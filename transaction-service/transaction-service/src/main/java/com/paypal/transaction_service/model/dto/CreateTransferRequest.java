@@ -1,22 +1,23 @@
 package com.paypal.transaction_service.model.dto;
 
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TransactionResponse {
+public class CreateTransferRequest {
 
-    private Long id;
-    private Long senderId;
+    @NotNull
     private Long receiverId;
+
+    @NotNull
+    @DecimalMin(value = "0.01")
     private BigDecimal amount;
-    private String status;
+
     private String description;
-    private LocalDateTime createdAt;
 }

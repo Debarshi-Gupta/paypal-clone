@@ -1,4 +1,4 @@
-package com.paypal.transaction_service.kafka.events;
+package com.paypal.wallet_service.kafka.events;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
