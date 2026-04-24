@@ -42,6 +42,18 @@ public class TransactionController {
         return service.getTransactionsBySender(senderId);
     }
 
+    @GetMapping("/{id}")
+    public TransactionResponse getTransactionById(
+            @PathVariable("id") Long transactionId,
+            Authentication authentication) {
+
+        Long senderId = extractUserId(authentication);
+
+        log.info("API getTransactionById called for id={} by user={}", transactionId, senderId);
+
+        return service.getTransactionById(transactionId, senderId);
+    }
+
     private Long extractUserId(Authentication authentication) {
         return (Long) authentication.getCredentials();
     }

@@ -10,4 +10,6 @@ public interface TransactionService {
     TransactionResponse createTransaction(Long senderId, CreateTransactionRequest request);
 
     List<TransactionResponse> getTransactionsBySender(Long senderId);
+
+    TransactionResponse getTransactionById(Long transactionId, Long senderId);
 }
