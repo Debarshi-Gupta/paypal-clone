@@ -206,13 +206,13 @@ public class TransactionServiceImpl implements TransactionService {
 
         log.info("Handling SUCCESS event for transferId={}", event.getTransferId());
 
-        Transfer txn = repository.findById(event.getTransferId())
+        Transfer transfer = repository.findById(event.getTransferId())
                 .orElseThrow(() -> new TransferNotFoundException("Transfer not found"));
 
-        txn.setStatus(TransferStatus.SUCCESS);
-        repository.save(txn);
+        transfer.setStatus(TransferStatus.SUCCESS);
+        repository.save(transfer);
 
-        log.info("Transfer marked SUCCESS for id={}", txn.getId());
+        log.info("Transfer marked SUCCESS for id={}", transfer.getId());
 
         return event;
     }
@@ -221,14 +221,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         log.info("Handling FAILED event for transferId={}", event.getTransferId());
 
-        Transfer txn = repository.findById(event.getTransferId())
+        Transfer transfer = repository.findById(event.getTransferId())
                 .orElseThrow(() -> new TransferNotFoundException("Transfer not found"));
 
-        txn.setStatus(TransferStatus.FAILED);
-        repository.save(txn);
+        transfer.setStatus(TransferStatus.FAILED);
+        repository.save(transfer);
 
         log.warn("Transfer marked FAILED for id={} reason={}",
-                txn.getId(), event.getReason());
+                transfer.getId(), event.getReason());
 
         return event;
     }
