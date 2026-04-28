@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,4 +21,5 @@ public abstract class TransferResultEvent extends KafkaEvent{
 
     private Long receiverId;
 
+    private BigDecimal amount;
 }

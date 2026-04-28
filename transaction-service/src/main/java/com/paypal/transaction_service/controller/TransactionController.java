@@ -28,21 +28,65 @@ public class TransactionController {
 
         Long userId = extractUserId(authentication);
 
-        log.info("API call: get balance for user {}", userId);
+        log.info("API getBalance called for userId={}", userId);
 
         return ResponseEntity.ok(service.getBalance(userId));
     }
 
-    @PostMapping("/deposit")
-    public ResponseEntity<DepositResponse> deposit(
+    @GetMapping("/deposits")
+    public List<DepositResponse> getDepositsByUserId(Authentication authentication) {
+
+        Long userId = extractUserId(authentication);
+
+        log.info("API getDepositsByUserId called for userId={}", userId);
+
+        return service.getDepositsByUserId(userId);
+    }
+
+    @GetMapping("/deposits/{id}")
+    public DepositResponse getDepositByIdAndUserId(
+            @PathVariable("id") Long depositId,
+            Authentication authentication) {
+
+        Long userId = extractUserId(authentication);
+
+        log.info("API getDepositByIdAndUserId called for depositId={} by userId={}", depositId, userId);
+
+        return service.getDepositByIdAndUserId(depositId, userId);
+    }
+
+    @PostMapping("/deposits")
+    public ResponseEntity<DepositResponse> initiateDeposit(
             @Valid @RequestBody DepositRequest request,
             Authentication authentication) {
 
         Long userId = extractUserId(authentication);
 
-        log.info("API call: deposit for user {}", userId);
+        log.info("API deposit called for userId={}", userId);
 
-        return ResponseEntity.ok(service.deposit(userId, request));
+        return ResponseEntity.ok(service.initiateDeposit(userId, request));
+    }
+
+    @GetMapping("/transfers")
+    public List<TransferResponse> getTransfersBySenderId(Authentication authentication) {
+
+        Long senderId = extractUserId(authentication);
+
+        log.info("API getTransfersBySenderId called for userId={}", senderId);
+
+        return service.getTransfersBySenderId(senderId);
+    }
+
+    @GetMapping("/transfers/{id}")
+    public TransferResponse getTransferByIdAndSenderId(
+            @PathVariable("id") Long transferId,
+            Authentication authentication) {
+
+        Long senderId = extractUserId(authentication);
+
+        log.info("API getTransferByIdAndSenderId called for transferId={} by userId={}", transferId, senderId);
+
+        return service.getTransferByIdAndSenderId(transferId, senderId);
     }
 
     @PostMapping("/transfers")
@@ -50,34 +94,11 @@ public class TransactionController {
             @Valid @RequestBody CreateTransferRequest request,
             Authentication authentication) {
 
-        String email = authentication.getName();
         Long senderId = extractUserId(authentication);
 
-        log.info("API initiateTransfer called by {}", email);
+        log.info("API initiateTransfer called for senderId={}", senderId);
 
         return service.initiateTransfer(senderId, request);
-    }
-
-    @GetMapping("/transfers")
-    public List<TransferResponse> getAllTransfers(Authentication authentication) {
-
-        Long senderId = extractUserId(authentication);
-
-        log.info("Fetching transfers for logged-in user");
-
-        return service.getTransfersBySenderId(senderId);
-    }
-
-    @GetMapping("/transfers/{id}")
-    public TransferResponse getTransferById(
-            @PathVariable("id") Long transferId,
-            Authentication authentication) {
-
-        Long senderId = extractUserId(authentication);
-
-        log.info("API getTransferById called for id={} by user={}", transferId, senderId);
-
-        return service.getTransferById(transferId, senderId);
     }
 
     private Long extractUserId(Authentication authentication) {

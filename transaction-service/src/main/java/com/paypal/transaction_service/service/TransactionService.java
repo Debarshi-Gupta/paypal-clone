@@ -1,5 +1,6 @@
 package com.paypal.transaction_service.service;
 
+import com.paypal.transaction_service.kafka.events.DepositResultEvent;
 import com.paypal.transaction_service.kafka.events.TransferResultEvent;
 import com.paypal.transaction_service.model.dto.CreateTransferRequest;
 import com.paypal.transaction_service.model.dto.DepositRequest;
@@ -13,13 +14,21 @@ public interface TransactionService {
 
     BigDecimal getBalance(Long userId);
 
-    DepositResponse deposit(Long userId, DepositRequest depositRequest);
+    List<DepositResponse> getDepositsByUserId(Long userId);
 
-    TransferResponse initiateTransfer(Long senderId, CreateTransferRequest request);
+    DepositResponse getDepositByIdAndUserId(Long depositId, Long userId);
+
+    DepositResponse initiateDeposit(Long userId, DepositRequest depositRequest);
+
+    DepositResultEvent handleDepositResult(String message);
 
     List<TransferResponse> getTransfersBySenderId(Long senderId);
 
-    TransferResponse getTransferById(Long transferId, Long senderId);
+    TransferResponse getTransferByIdAndSenderId(Long transferId, Long senderId);
+
+    TransferResponse initiateTransfer(Long senderId, CreateTransferRequest request);
 
     TransferResultEvent handleTransferResult(String message);
+
+
 }

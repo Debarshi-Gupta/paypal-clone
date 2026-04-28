@@ -3,6 +3,7 @@ package com.paypal.wallet_service.service;
 import com.paypal.wallet_service.exception.InsufficientBalanceException;
 import com.paypal.wallet_service.exception.WalletAlreadyExistsException;
 import com.paypal.wallet_service.exception.WalletNotFoundException;
+import com.paypal.wallet_service.kafka.events.*;
 import com.paypal.wallet_service.model.dto.DepositResponse;
 import com.paypal.wallet_service.model.entity.Wallet;
 import com.paypal.wallet_service.repository.WalletRepository;
@@ -45,50 +46,64 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Transactional
-    public DepositResponse deposit(Long userId, BigDecimal amount) {
+    @Override
+    public DepositSucceededEvent deposit(DepositInitiatedEvent event) {
 
-        log.info("Depositing {} to wallet of user {}", amount, userId);
+        log.info("Depositing {} to wallet of user {}", event.getAmount(), event.getUserId());
 
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+        if (event.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Deposit amount must be greater than zero");
         }
 
-        Wallet wallet = repository.findByUserId(userId)
+        Wallet userWallet = repository.findByUserId(event.getUserId())
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
 
-        wallet.setBalance(wallet.getBalance().add(amount));
+        userWallet.setBalance(userWallet.getBalance().add(event.getAmount()));
 
-        log.info("Deposit successful. New balance for user {} is {}", userId, wallet.getBalance());
+        log.info("Deposit successful. New balance for user {} is {}", event.getUserId(), userWallet.getBalance());
 
-        return DepositResponse.builder()
-                .amount(amount)
-                .currentBalance(wallet.getBalance())
+        return DepositSucceededEvent.builder()
+                .depositId(event.getDepositId())
+                .userId(event.getUserId())
+                .amount(event.getAmount())
+                .userBalance(userWallet.getBalance())
                 .build();
     }
 
     @Transactional
-    public void transfer(Long senderId, Long receiverId, BigDecimal amount) {
+    @Override
+    public TransferSucceededEvent transfer(TransferInitiatedEvent event) {
 
-        log.info("Initiating transfer from {} to {} amount {}", senderId, receiverId, amount);
+        log.info("Initiating transfer from {} to {} amount {}", event.getSenderId(), event.getReceiverId(), event.getAmount());
 
-        if (senderId.equals(receiverId)) {
+
+        if (event.getSenderId().equals(event.getReceiverId())) {
             throw new IllegalArgumentException("Sender and receiver cannot be same");
         }
 
-        Wallet sender = repository.findByUserId(senderId)
+        Wallet senderWallet = repository.findByUserId(event.getSenderId())
                 .orElseThrow(() -> new WalletNotFoundException("Sender wallet not found"));
 
-        Wallet receiver = repository.findByUserId(receiverId)
+        Wallet receiverWallet = repository.findByUserId(event.getReceiverId())
                 .orElseThrow(() -> new WalletNotFoundException("Receiver wallet not found"));
 
-        if (sender.getBalance().compareTo(amount) < 0) {
-            log.warn("Insufficient balance for user {}", senderId);
+        if (senderWallet.getBalance().compareTo(event.getAmount()) < 0) {
+            log.warn("Insufficient balance for user {}", event.getSenderId());
             throw new InsufficientBalanceException("Insufficient balance");
         }
 
-        sender.setBalance(sender.getBalance().subtract(amount));
-        receiver.setBalance(receiver.getBalance().add(amount));
+        senderWallet.setBalance(senderWallet.getBalance().subtract(event.getAmount()));
+        receiverWallet.setBalance(receiverWallet.getBalance().add(event.getAmount()));
 
-        log.info("Transfer successful: {} -> {} amount {}", senderId, receiverId, amount);
+        log.info("Transfer successful: {} -> {} amount {}", event.getSenderId(), event.getReceiverId(), event.getAmount());
+
+        return TransferSucceededEvent.builder()
+                .transferId(event.getTransferId())
+                .senderId(event.getSenderId())
+                .receiverId(event.getReceiverId())
+                .amount(event.getAmount())
+                .senderBalance(senderWallet.getBalance())
+                .receiverBalance(receiverWallet.getBalance())
+                .build();
     }
 }

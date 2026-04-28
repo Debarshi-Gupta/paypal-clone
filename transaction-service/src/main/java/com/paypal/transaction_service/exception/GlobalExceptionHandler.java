@@ -19,8 +19,18 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(DepositNotFoundException.class)
+    public ResponseEntity<?> handleDepositNotFoundException(DepositNotFoundException ex) {
+        return build(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
     @ExceptionHandler(TransferProcessingException.class)
     public ResponseEntity<?> handleTransferProcessingException(TransferProcessingException ex) {
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
+
+    @ExceptionHandler(DepositProcessingException.class)
+    public ResponseEntity<?> handleDepositProcessingException(DepositProcessingException ex) {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
@@ -30,7 +40,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGeneric(Exception ex) {
+    public ResponseEntity<?> handleGenericException(Exception ex) {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
     }
 

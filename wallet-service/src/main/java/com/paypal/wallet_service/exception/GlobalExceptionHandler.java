@@ -17,25 +17,25 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(WalletNotFoundException.class)
-    public ResponseEntity<?> handleWalletNotFound(WalletNotFoundException ex, HttpServletRequest request) {
+    public ResponseEntity<?> handleWalletNotFoundException(WalletNotFoundException ex, HttpServletRequest request) {
         log.warn("Wallet not found: {}", ex.getMessage());
         return build(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(WalletAlreadyExistsException.class)
-    public ResponseEntity<?> handleWalletAlreadyExists(WalletAlreadyExistsException ex, HttpServletRequest request) {
+    public ResponseEntity<?> handleWalletAlreadyExistsException(WalletAlreadyExistsException ex, HttpServletRequest request) {
         log.warn("Wallet already exists: {}", ex.getMessage());
         return build(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(InsufficientBalanceException.class)
-    public ResponseEntity<?> handleInsufficientBalance(InsufficientBalanceException ex, HttpServletRequest request) {
+    public ResponseEntity<?> handleInsufficientBalanceException(InsufficientBalanceException ex, HttpServletRequest request) {
         log.warn("Insufficient balance: {}", ex.getMessage());
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request) {
         log.warn("Invalid input: {}", ex.getMessage());
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
     }
@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGeneric(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<?> handleGenericException(Exception ex, HttpServletRequest request) {
         log.error("Unexpected error occurred", ex);
         return build(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Something went wrong. Please try again later",

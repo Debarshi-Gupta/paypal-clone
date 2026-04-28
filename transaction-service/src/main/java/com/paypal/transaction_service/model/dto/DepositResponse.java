@@ -11,7 +11,11 @@ import java.math.BigDecimal;
 @Builder
 public class DepositResponse {
 
+    private Long depositId;
+
+    private Long userId;
+
     private BigDecimal amount;
 
-    private BigDecimal currentBalance;
+    private String status;
 }

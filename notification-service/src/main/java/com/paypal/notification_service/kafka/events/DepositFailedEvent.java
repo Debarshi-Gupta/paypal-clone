@@ -1,0 +1,17 @@
+package com.paypal.notification_service.kafka.events;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+public class DepositFailedEvent extends DepositResultEvent {
+
+    private String reason;
+}

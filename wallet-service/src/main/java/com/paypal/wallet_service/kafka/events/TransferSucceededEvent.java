@@ -15,5 +15,8 @@ import java.math.BigDecimal;
 @SuperBuilder
 public class TransferSucceededEvent extends TransferResultEvent {
 
-    private BigDecimal amount;
+    private BigDecimal senderBalance;
+
+    private BigDecimal receiverBalance;
 }
+

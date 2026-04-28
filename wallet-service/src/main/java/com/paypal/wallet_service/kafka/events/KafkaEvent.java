@@ -19,6 +19,10 @@ import lombok.experimental.SuperBuilder;
         property = "eventType"
 )
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = DepositInitiatedEvent.class, name = "DEPOSIT_INITIATED"),
+        @JsonSubTypes.Type(value = DepositSucceededEvent.class, name = "DEPOSIT_SUCCEEDED"),
+        @JsonSubTypes.Type(value = DepositFailedEvent.class, name = "DEPOSIT_FAILED"),
+        @JsonSubTypes.Type(value = TransferInitiatedEvent.class, name = "TRANSFER_INITIATED"),
         @JsonSubTypes.Type(value = TransferSucceededEvent.class, name = "TRANSFER_SUCCEEDED"),
         @JsonSubTypes.Type(value = TransferFailedEvent.class, name = "TRANSFER_FAILED")
 })

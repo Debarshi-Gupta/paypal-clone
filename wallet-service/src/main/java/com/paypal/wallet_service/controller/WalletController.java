@@ -38,13 +38,4 @@ public class WalletController {
         return ResponseEntity.ok(service.getBalance(userId));
     }
 
-    @PostMapping("/deposit")
-    public ResponseEntity<DepositResponse> deposit(
-            @RequestParam Long userId,
-            @Valid @RequestBody DepositRequest request) {
-
-        log.info("API call: deposit for user {}", userId);
-
-        return ResponseEntity.ok(service.deposit(userId, request.getAmount()));
-    }
 }

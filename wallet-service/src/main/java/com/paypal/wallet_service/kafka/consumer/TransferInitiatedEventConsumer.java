@@ -47,21 +47,9 @@ public class TransferInitiatedEventConsumer {
         TransferFailedEvent transferFailedEvent;
 
         try {
-            walletService.transfer(
-                    event.getSenderId(),
-                    event.getReceiverId(),
-                    event.getAmount()
-            );
+            transferSucceededEvent = walletService.transfer(event);
 
             log.info("Wallet transfer successful for transferId={}", event.getTransferId());
-
-            transferSucceededEvent = TransferSucceededEvent.builder()
-                    .eventType(KafkaEventType.TRANSFER_SUCCEEDED)
-                    .transferId(event.getTransferId())
-                    .senderId(event.getSenderId())
-                    .receiverId(event.getReceiverId())
-                    .amount(event.getAmount())
-                    .build();
 
             publishResult(transferSucceededEvent);
 
