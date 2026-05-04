@@ -29,19 +29,19 @@ public class Notification {
     @Column(name = "transaction_id", nullable = false)
     private Long transactionId;
 
-    @Column(name = "transaction_type")
+    @Column(name = "transaction_type", nullable = false)
     private TransactionType transactionType;
 
-    @Column(name = "notification_type")
+    @Column(name = "notification_type", nullable = false)
     private NotificationType notificationType;
 
-    @Column(nullable = false, length = 1000)
+    @Column(name = "message", nullable = false, length = 1000)
     private String message;
 
-    @Column(nullable = false)
+    @Column(name = "isRead",nullable = false)
     private boolean isRead;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at",nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

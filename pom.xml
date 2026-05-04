@@ -12,6 +12,7 @@
 
     <modules>
         <module>notification-service</module>
+        <module>reward-service</module>
         <module>transaction-service</module>
         <module>user-service</module>
         <module>wallet-service</module>

@@ -53,7 +53,6 @@ public class DepositResultNotificationConsumer {
             }
         } catch (Exception ex) {
             log.error("Error processing deposit result event", ex);
-            throw new DepositNotificationProcessingException(ex.getMessage());
         }
     }
 }

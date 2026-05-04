@@ -34,17 +34,17 @@ public class TransactionController {
     }
 
     @GetMapping("/deposits")
-    public List<DepositResponse> getDepositsByUserId(Authentication authentication) {
+    public ResponseEntity<List<DepositResponse>> getDepositsByUserId(Authentication authentication) {
 
         Long userId = extractUserId(authentication);
 
         log.info("API getDepositsByUserId called for userId={}", userId);
 
-        return service.getDepositsByUserId(userId);
+        return ResponseEntity.ok(service.getDepositsByUserId(userId));
     }
 
     @GetMapping("/deposits/{id}")
-    public DepositResponse getDepositByIdAndUserId(
+    public ResponseEntity<DepositResponse> getDepositByIdAndUserId(
             @PathVariable("id") Long depositId,
             Authentication authentication) {
 
@@ -52,7 +52,7 @@ public class TransactionController {
 
         log.info("API getDepositByIdAndUserId called for depositId={} by userId={}", depositId, userId);
 
-        return service.getDepositByIdAndUserId(depositId, userId);
+        return ResponseEntity.ok(service.getDepositByIdAndUserId(depositId, userId));
     }
 
     @PostMapping("/deposits")
@@ -68,17 +68,17 @@ public class TransactionController {
     }
 
     @GetMapping("/transfers")
-    public List<TransferResponse> getTransfersBySenderId(Authentication authentication) {
+    public ResponseEntity<List<TransferResponse>> getTransfersBySenderId(Authentication authentication) {
 
         Long senderId = extractUserId(authentication);
 
         log.info("API getTransfersBySenderId called for userId={}", senderId);
 
-        return service.getTransfersBySenderId(senderId);
+        return ResponseEntity.ok(service.getTransfersBySenderId(senderId));
     }
 
     @GetMapping("/transfers/{id}")
-    public TransferResponse getTransferByIdAndSenderId(
+    public ResponseEntity<TransferResponse> getTransferByIdAndSenderId(
             @PathVariable("id") Long transferId,
             Authentication authentication) {
 
@@ -86,11 +86,11 @@ public class TransactionController {
 
         log.info("API getTransferByIdAndSenderId called for transferId={} by userId={}", transferId, senderId);
 
-        return service.getTransferByIdAndSenderId(transferId, senderId);
+        return ResponseEntity.ok(service.getTransferByIdAndSenderId(transferId, senderId));
     }
 
     @PostMapping("/transfers")
-    public TransferResponse initiateTransfer(
+    public ResponseEntity<TransferResponse> initiateTransfer(
             @Valid @RequestBody CreateTransferRequest request,
             Authentication authentication) {
 
@@ -98,7 +98,7 @@ public class TransactionController {
 
         log.info("API initiateTransfer called for senderId={}", senderId);
 
-        return service.initiateTransfer(senderId, request);
+        return ResponseEntity.ok(service.initiateTransfer(senderId, request));
     }
 
     private Long extractUserId(Authentication authentication) {

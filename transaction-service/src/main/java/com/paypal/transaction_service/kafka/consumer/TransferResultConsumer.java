@@ -23,6 +23,9 @@ public class TransferResultConsumer {
     @Value("${kafka.topic.transfer.notification}")
     private String transferNotificationTopic;
 
+    @Value("${kafka.topic.transfer.reward}")
+    private String transferRewardTopic;
+
     @KafkaListener(
             topics = "${kafka.topic.transfer.result}",
             groupId = "transfer-group"
@@ -33,26 +36,48 @@ public class TransferResultConsumer {
 
         try {
             TransferResultEvent transferResultEvent = transactionService.handleTransferResult(message);
-            publishNotification(transferResultEvent);
+            publishTransferNotification(transferResultEvent);
+            if (transferResultEvent instanceof TransferSucceededEvent) {
+                publishTransferReward(transferResultEvent);
+            }
         } catch (Exception ex) {
             log.error("Error processing transfer result event", ex);
         }
     }
 
-    private void publishNotification(KafkaEvent event) {
+    private void publishTransferNotification(KafkaEvent event) {
 
+        Long transferId = extractTransferId(event);
         try {
             kafkaEventProducer.sendEvent(
                     transferNotificationTopic,
-                    null,
+                    String.valueOf(transferId),
                     event
             );
 
             log.info("Notification event published for transferId={}",
-                    extractTransferId(event));
+                    transferId);
 
         } catch (Exception ex) {
             log.error("Failed to publish notification event", ex);
+        }
+    }
+
+    private void publishTransferReward(KafkaEvent event) {
+
+        Long transferId = extractTransferId(event);
+        try {
+            kafkaEventProducer.sendEvent(
+                    transferRewardTopic,
+                    String.valueOf(transferId),
+                    event
+            );
+
+            log.info("Reward event published for transferId={}",
+                    transferId);
+
+        } catch (Exception ex) {
+            log.error("Failed to publish reward event", ex);
         }
     }
 

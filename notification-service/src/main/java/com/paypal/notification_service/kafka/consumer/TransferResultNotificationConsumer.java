@@ -62,7 +62,6 @@ public class TransferResultNotificationConsumer {
             }
         } catch (Exception ex) {
             log.error("Error processing transfer result event", ex);
-            throw new TransferNotificationProcessingException(ex.getMessage());
         }
     }
 }

@@ -142,7 +142,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .transactionId(event.getDepositId())
                 .transactionType(TransactionType.DEPOSIT)
                 .notificationType(NotificationType.DEPOSIT_SUCCEEDED)
-                .message("You deposited " + event.getAmount() + " your wallet ")
+                .message("You deposited " + event.getAmount() + " into your wallet.")
                 .build();
         notificationRepository.save(userNotification);
         log.info("Notification saved for userId={}", user.getId());
