@@ -11,6 +11,7 @@
 
 
     <modules>
+        <module>api-gateway</module>
         <module>notification-service</module>
         <module>reward-service</module>
         <module>transaction-service</module>
