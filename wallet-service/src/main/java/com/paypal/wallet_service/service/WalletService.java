@@ -5,6 +5,7 @@ import com.paypal.wallet_service.kafka.events.DepositSucceededEvent;
 import com.paypal.wallet_service.kafka.events.TransferInitiatedEvent;
 import com.paypal.wallet_service.kafka.events.TransferSucceededEvent;
 import com.paypal.wallet_service.model.dto.DepositResponse;
+import com.paypal.wallet_service.model.dto.UserBalanceResponse;
 import com.paypal.wallet_service.model.entity.Wallet;
 
 import java.math.BigDecimal;
@@ -13,7 +14,7 @@ public interface WalletService {
 
     void createWallet(Long userId);
 
-    BigDecimal getBalance(Long userId);
+    UserBalanceResponse getBalance(Long userId);
 
     DepositSucceededEvent deposit(DepositInitiatedEvent event);
 

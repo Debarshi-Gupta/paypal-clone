@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paypal.transaction_service.exception.*;
 import com.paypal.transaction_service.kafka.KafkaEventProducer;
 import com.paypal.transaction_service.kafka.events.*;
-import com.paypal.transaction_service.model.dto.CreateTransferRequest;
-import com.paypal.transaction_service.model.dto.DepositRequest;
-import com.paypal.transaction_service.model.dto.DepositResponse;
-import com.paypal.transaction_service.model.dto.TransferResponse;
+import com.paypal.transaction_service.model.dto.*;
 import com.paypal.transaction_service.model.entity.Deposit;
 import com.paypal.transaction_service.model.entity.DepositStatus;
 import com.paypal.transaction_service.model.entity.Transfer;
@@ -15,7 +12,6 @@ import com.paypal.transaction_service.model.entity.TransferStatus;
 import com.paypal.transaction_service.repository.DepositRepository;
 import com.paypal.transaction_service.repository.TransferRepository;
 import com.paypal.transaction_service.service.feign.UserClient;
-import com.paypal.transaction_service.service.feign.WalletClient;
 import com.paypal.transaction_service.service.mapper.DepositMapper;
 import com.paypal.transaction_service.service.mapper.TransferMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -36,7 +31,6 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransferMapper transferMapper;
     private final DepositMapper depositMapper;
     private final UserClient userClient;
-    private final WalletClient walletClient;
     private final KafkaEventProducer kafkaEventProducer;
     private final ObjectMapper objectMapper;
 
@@ -46,34 +40,22 @@ public class TransactionServiceImpl implements TransactionService {
     @Value("${kafka.topic.deposit.initiated}")
     private String depositInitiatedTopic;
 
-    @Override
-    public BigDecimal getBalance(Long userId) {
-
-        log.info("Checking balance of wallet for userId={}", userId);
-
-        try {
-            userClient.getUserById(userId);
-        } catch (Exception e) {
-            log.error("User Id {} doesn't exist", userId);
-            throw new UserNotFoundException("User Id not found");
-        }
-
-        try {
-            BigDecimal amount = walletClient.getBalance(userId);
-            log.info("Balance amount {} fetched successfully for userId={}", amount, userId);
-            return amount;
-        } catch (Exception ex) {
-            log.info("Failed to fetch balance amount of wallet for userId={}", userId);
-            throw new RuntimeException(ex.getMessage());
-        }
-    }
 
     @Override
     public List<DepositResponse> getDepositsByUserId(Long userId) {
 
         log.info("Fetching deposits for user: {}", userId);
 
-        return depositRepository.findByUserId(userId)
+        UserResponse user;
+
+        try {
+            user = userClient.getUserById(userId);
+        } catch (Exception e) {
+            log.error("User Id {} doesn't exist", userId);
+            throw new UserNotFoundException("User Id not found");
+        }
+
+        return depositRepository.findByUserId(user.getId())
                 .stream()
                 .map(depositMapper::toResponse)
                 .toList();
@@ -84,7 +66,16 @@ public class TransactionServiceImpl implements TransactionService {
 
         log.info("Fetching depositId={} for userId={}", depositId, userId);
 
-        Deposit deposit = depositRepository.findByIdAndUserId(depositId, userId)
+        UserResponse user;
+
+        try {
+            user = userClient.getUserById(userId);
+        } catch (Exception e) {
+            log.error("User Id {} doesn't exist", userId);
+            throw new UserNotFoundException("User Id not found");
+        }
+
+        Deposit deposit = depositRepository.findByIdAndUserId(depositId, user.getId())
                 .orElseThrow(() -> {
                     log.warn("Deposit not found or access denied. depositId={}, userId={}",
                             depositId, userId);
@@ -101,10 +92,17 @@ public class TransactionServiceImpl implements TransactionService {
 
         log.info("Initiating deposit for userId={} amount={}", userId, request.getAmount());
 
-        userClient.getUserById(userId);
+        UserResponse user;
+
+        try {
+            user = userClient.getUserById(userId);
+        } catch (Exception e) {
+            log.error("User Id {} doesn't exist", userId);
+            throw new UserNotFoundException("User Id not found");
+        }
 
         Deposit deposit = Deposit.builder()
-                .userId(userId)
+                .userId(user.getId())
                 .amount(request.getAmount())
                 .status(DepositStatus.PENDING)
                 .build();
@@ -201,7 +199,16 @@ public class TransactionServiceImpl implements TransactionService {
 
         log.info("Fetching transfers for sender: {}", senderId);
 
-        return transferRepository.findBySenderId(senderId)
+        UserResponse sender;
+
+        try {
+            sender = userClient.getUserById(senderId);
+        } catch (Exception e) {
+            log.error("Sender Id {} doesn't exist", senderId);
+            throw new UserNotFoundException("Sender Id not found");
+        }
+
+        return transferRepository.findBySenderId(sender.getId())
                 .stream()
                 .map(transferMapper::toResponse)
                 .toList();
@@ -212,7 +219,16 @@ public class TransactionServiceImpl implements TransactionService {
 
         log.info("Fetching transferId={} for senderId={}", transferId, senderId);
 
-        Transfer transfer = transferRepository.findByIdAndSenderId(transferId, senderId)
+        UserResponse sender;
+
+        try {
+            sender = userClient.getUserById(senderId);
+        } catch (Exception e) {
+            log.error("Sender Id {} doesn't exist", senderId);
+            throw new UserNotFoundException("Sender Id not found");
+        }
+
+        Transfer transfer = transferRepository.findByIdAndSenderId(transferId, sender.getId())
                 .orElseThrow(() -> {
                     log.warn("Transfer not found or access denied. transferId={}, senderId={}",
                             transferId, senderId);
@@ -233,23 +249,25 @@ public class TransactionServiceImpl implements TransactionService {
             throw new UnauthorizedTransferException("Sender and receiver cannot be same");
         }
 
+        UserResponse sender, receiver;
+
         try {
-            userClient.getUserById(senderId);
+            sender = userClient.getUserById(senderId);
         } catch (Exception e) {
             log.error("Sender Id {} doesn't exist", senderId);
             throw new UserNotFoundException("Sender Id not found");
         }
 
         try {
-            userClient.getUserById(request.getReceiverId());
+            receiver = userClient.getUserById(request.getReceiverId());
         } catch (Exception e) {
             log.error("Receiver Id {} doesn't exist", request.getReceiverId());
             throw new UserNotFoundException("Receiver Id not found");
         }
 
         Transfer transfer = Transfer.builder()
-                .senderId(senderId)
-                .receiverId(request.getReceiverId())
+                .senderId(sender.getId())
+                .receiverId(receiver.getId())
                 .amount(request.getAmount())
                 .description(request.getDescription())
                 .status(TransferStatus.PENDING)

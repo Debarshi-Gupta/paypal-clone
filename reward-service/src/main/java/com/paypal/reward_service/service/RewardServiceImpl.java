@@ -6,6 +6,7 @@ import com.paypal.reward_service.exception.UserNotFoundException;
 import com.paypal.reward_service.kafka.events.TransferSucceededEvent;
 import com.paypal.reward_service.model.dto.TransferRewardResponse;
 import com.paypal.reward_service.model.dto.UserResponse;
+import com.paypal.reward_service.model.dto.UserRewardPointsResponse;
 import com.paypal.reward_service.model.entity.TransferReward;
 import com.paypal.reward_service.model.entity.UserRewardBalance;
 import com.paypal.reward_service.repository.TransferRewardRepository;
@@ -80,7 +81,7 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
-    public Integer getUserRewardPoints(Long userId) {
+    public UserRewardPointsResponse getUserRewardPoints(Long userId) {
 
         log.info("Fetching reward points for userId={}", userId);
 
@@ -99,7 +100,10 @@ public class RewardServiceImpl implements RewardService {
 
         log.info("Fetched reward points {} for userId={}", userRewardPoints, user.getId());
 
-        return userRewardPoints;
+        return UserRewardPointsResponse.builder()
+                .userId(user.getId())
+                .userRewardPoints(userRewardPoints)
+                .build();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.paypal.reward_service.controller;
 
 import com.paypal.reward_service.model.dto.TransferRewardResponse;
+import com.paypal.reward_service.model.dto.UserRewardPointsResponse;
 import com.paypal.reward_service.service.RewardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ public class RewardController {
     private final RewardService rewardService;
 
     @GetMapping("/points")
-    public ResponseEntity<Integer> getUserRewardPoints(Authentication authentication) {
+    public ResponseEntity<UserRewardPointsResponse> getUserRewardPoints(Authentication authentication) {
 
         Long userId = extractUserId(authentication);
 

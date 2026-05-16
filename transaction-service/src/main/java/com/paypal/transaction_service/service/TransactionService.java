@@ -12,8 +12,6 @@ import java.util.List;
 
 public interface TransactionService {
 
-    BigDecimal getBalance(Long userId);
-
     List<DepositResponse> getDepositsByUserId(Long userId);
 
     DepositResponse getDepositByIdAndUserId(Long depositId, Long userId);
@@ -29,6 +27,5 @@ public interface TransactionService {
     TransferResponse initiateTransfer(Long senderId, CreateTransferRequest request);
 
     TransferResultEvent handleTransferResult(String message);
-
 
 }

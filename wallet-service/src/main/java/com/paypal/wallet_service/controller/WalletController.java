@@ -1,9 +1,7 @@
 package com.paypal.wallet_service.controller;
 
-import com.paypal.wallet_service.model.dto.DepositRequest;
-import com.paypal.wallet_service.model.dto.DepositResponse;
+import com.paypal.wallet_service.model.dto.UserBalanceResponse;
 import com.paypal.wallet_service.service.WalletService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -31,11 +29,16 @@ public class WalletController {
     }
 
     @GetMapping("/balance")
-    public ResponseEntity<BigDecimal> getBalance(@RequestParam Long userId) {
+    public ResponseEntity<UserBalanceResponse> getBalance(Authentication authentication) {
+
+        Long userId = extractUserId(authentication);
 
         log.info("API call: get balance for user {}", userId);
 
         return ResponseEntity.ok(service.getBalance(userId));
     }
 
+    private Long extractUserId(Authentication authentication) {
+        return (Long) authentication.getCredentials();
+    }
 }

@@ -23,16 +23,6 @@ public class TransactionController {
 
     private final TransactionService service;
 
-    @GetMapping("/balance")
-    public ResponseEntity<BigDecimal> getBalance(Authentication authentication) {
-
-        Long userId = extractUserId(authentication);
-
-        log.info("API getBalance called for userId={}", userId);
-
-        return ResponseEntity.ok(service.getBalance(userId));
-    }
-
     @GetMapping("/deposits")
     public ResponseEntity<List<DepositResponse>> getDepositsByUserId(Authentication authentication) {
 
